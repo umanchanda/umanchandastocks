@@ -243,7 +243,7 @@ def sell():
                     id=session["user_id"], symbol=stock["symbol"], shares=-shares_sold, price=stock_price)
 
         new_total = float(cash) + shares_sold * float(stock_price)
-        db.execute("UPDATE users SET cash=:cash", cash=new_total)
+        db.execute("UPDATE users SET cash=:cash WHERE id=:id", cash=new_total, id=session['user_id'])
 
         new_shares = curr_shares-shares_sold
         if new_shares > 0:
