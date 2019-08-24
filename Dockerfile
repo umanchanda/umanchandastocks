@@ -1,9 +1,9 @@
-FROM ubuntu:16.04
+FROM ubuntu:18.04
 
 LABEL maintainer="uday.manchanda14@gmail.com"
 
 RUN apt-get update -y && \
-    apt-get install -y python3-pip python3-dev
+    apt-get install -y python3.6 python3-pip python3-dev
 
 COPY ./requirements.txt /app/requirements.txt
 
