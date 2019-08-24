@@ -1,4 +1,4 @@
 cs50
 Flask
 Flask-Session
-psycopg2
+psycopg2-binary
