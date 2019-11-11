@@ -14,4 +14,4 @@ Head over to `127.0.0.1:5000` to run the application in your browser
 
 Enjoy!
 
-This is also hosted at [umanchandastocks.herokuapp.com](https://umanchanda.herokuapp.com)
+This is also hosted at [umanchandastocks.herokuapp.com](https://umanchandastocks.herokuapp.com)
