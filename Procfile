@@ -1,2 +1,2 @@
-web: sudo docker build -t umanchandastocks .
-web: sudo docker run umanchandastocks
+web: bin/run-prod.sh
+worker: bin/run-worker.sh
