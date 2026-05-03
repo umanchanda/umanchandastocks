@@ -1,5 +1,6 @@
 # coding=utf8
 import csv
+import os
 import urllib.request
 
 from flask import redirect, render_template, request, session
@@ -49,64 +50,41 @@ def lookup(symbol):
     # Query Yahoo for quote
     # http://stackoverflow.com/a/21351911
     try:
-
-        # GET CSV
         url = f"http://download.finance.yahoo.com/d/quotes.csv?f=snl1&s={symbol}"
-        webpage = urllib.request.urlopen(url)
-
-        # Read CSV
+        webpage = urllib.request.urlopen(url, timeout=5)
         datareader = csv.reader(webpage.read().decode("utf-8").splitlines())
-
-        # Parse first row
         row = next(datareader)
-
-        # Ensure stock exists
         try:
             price = float(row[2])
-        except:
+        except (ValueError, IndexError):
             return None
-
-        # Return stock's name (as a str), price (as a float), and (uppercased) symbol (as a str)
         return {
             "name": row[1],
             "price": price,
             "symbol": row[0].upper()
         }
-
-    except:
+    except Exception:
         pass
 
     # Query Alpha Vantage for quote instead
     # https://www.alphavantage.co/documentation/
     try:
-
-        # GET CSV
-        url = f"https://www.alphavantage.co/query?apikey=NAJXWIA8D6VN6A3K&datatype=csv&function=TIME_SERIES_INTRADAY&interval=1min&symbol={symbol}"
-        webpage = urllib.request.urlopen(url)
-
-        # Parse CSV
+        api_key = os.environ.get("ALPHAVANTAGE_API_KEY", "")
+        url = f"https://www.alphavantage.co/query?apikey={api_key}&datatype=csv&function=TIME_SERIES_INTRADAY&interval=1min&symbol={symbol}"
+        webpage = urllib.request.urlopen(url, timeout=5)
         datareader = csv.reader(webpage.read().decode("utf-8").splitlines())
-
-        # Ignore first row
         next(datareader)
-
-        # Parse second row
         row = next(datareader)
-
-        # Ensure stock exists
         try:
             price = float(row[4])
-        except:
+        except (ValueError, IndexError):
             return None
-
-        # Return stock's name (as a str), price (as a float), and (uppercased) symbol (as a str)
         return {
-            "name": symbol.upper(),  # for backward compatibility with Yahoo
+            "name": symbol.upper(),
             "price": price,
             "symbol": symbol.upper()
         }
-
-    except:
+    except Exception:
         return None
 
 
