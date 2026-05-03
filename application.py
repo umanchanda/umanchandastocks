@@ -19,6 +19,7 @@ def after_request(response):
     response.headers["Cache-Control"] = "no-cache, no-store, must-revalidate"
     response.headers["Expires"] = 0
     response.headers["Pragma"] = "no-cache"
+    response.headers["Strict-Transport-Security"] = "max-age=31536000; includeSubDomains"
     return response
 
 
@@ -31,8 +32,8 @@ app.config["SESSION_PERMANENT"] = False
 app.config["SESSION_TYPE"] = "filesystem"
 Session(app)
 
-# Configure CS50 Library to use SQLite database
-db = SQL("sqlite:///finance.db" or "postgres://bzozeirfyagqhp:ae51562cfb8ffda3e5cd4104f40b7264bcbca2822caf773cee494674725ac1d8@ec2-107-22-238-186.compute-1.amazonaws.com:5432/d9cpbnskg338i8")
+# Configure CS50 Library to use SQLite database, or a DATABASE_URL env var for production
+db = SQL(os.environ.get("DATABASE_URL", "sqlite:///finance.db"))
 
 
 @app.route("/")
@@ -43,13 +44,10 @@ def index():
     stocks = db.execute("SELECT * FROM portfolio WHERE id=:id", id=session['user_id'])
     cash_db = db.execute("SELECT cash FROM users WHERE id=:id", id=session['user_id'])
 
-    total = cash_db[0]['cash']
+    cash = cash_db[0]['cash']
 
-    moneyspent = 0
-    for stock in stocks:
-        moneyspent += float(stock['total'])
-
-    cash = total - moneyspent
+    stocks_value = sum(float(stock['total']) for stock in stocks)
+    total = cash + stocks_value
 
     cash = '{0:.2f}'.format(cash)
     total = '{0:.2f}'.format(total)
@@ -62,20 +60,23 @@ def index():
 def buy():
     """Buy shares of stock"""
     if request.method == "POST":
-        stock = lookup(request.form.get("symbol").upper())
+        symbol = request.form.get("symbol")
+        if not symbol:
+            return apology("Must provide a stock symbol", 400)
+        stock = lookup(symbol.upper())
         if not stock:
             return apology("Stock not found", 400)
 
         try:
             shares_bought = int(request.form.get("shares"))
-            if shares_bought < 0:
-                return apology("Invalid number of shares", 400)
-        except:
+            if shares_bought <= 0:
+                return apology("Shares must be a positive number", 400)
+        except (ValueError, TypeError):
             return apology("Invalid number of shares", 400)
 
         money = db.execute("SELECT cash FROM users WHERE id=:id", id=session["user_id"])
         money_available = money[0]["cash"]
-        stock_price = lookup(request.form.get("symbol").upper())["price"]
+        stock_price = stock["price"]
 
         money_left = money_available - shares_bought * stock_price
 
@@ -165,9 +166,12 @@ def logout():
 def quote():
     """Get stock quote."""
     if request.method == "POST":
-        stock = lookup(request.form.get("symbol").upper())
+        symbol = request.form.get("symbol")
+        if not symbol:
+            return apology("Must provide a stock symbol", 400)
+        stock = lookup(symbol.upper())
         if not stock:
-            return apology("Stock not found")
+            return apology("Stock not found", 400)
 
         return render_template("quoted.html", stock=stock)
     else:
@@ -190,6 +194,10 @@ def register():
         # Ensure password was submitted
         elif not request.form.get("password"):
             return apology("must provide password", 400)
+
+        # Ensure password meets minimum length
+        elif len(request.form.get("password")) < 8:
+            return apology("password must be at least 8 characters", 400)
 
         # Ensure passwords match
         elif request.form.get("password") != request.form.get("confirmation"):
@@ -219,11 +227,13 @@ def sell():
     portfolio = db.execute("SELECT * FROM portfolio WHERE id=:id", id=session['user_id'])
 
     if request.method == "POST":
-        stock = lookup(request.form.get("symbol").upper())
-        stock_price = lookup(request.form.get("symbol"))['price']
-
+        symbol = request.form.get("symbol")
+        if not symbol:
+            return apology("Must provide a stock symbol", 400)
+        stock = lookup(symbol.upper())
         if not stock:
             return apology("invalid stock", 400)
+        stock_price = stock["price"]
 
         stuff = db.execute("SELECT shares,price,total FROM portfolio WHERE id=:id AND symbol=:symbol",
                             id=session['user_id'], symbol=stock['symbol'])
@@ -233,11 +243,11 @@ def sell():
 
         try:
             shares_sold = int(request.form.get("shares"))
-            if shares_sold < 0:
-                return apology("Negative number of shares", 400)
+            if shares_sold <= 0:
+                return apology("Shares must be a positive number", 400)
             elif curr_shares < shares_sold:
                 return apology("Do not have enough shares", 400)
-        except:
+        except (ValueError, TypeError):
             return apology("Invalid number of shares", 400)
 
         db.execute("INSERT INTO histories (id, symbol, shares, price) VALUES (:id, :symbol, :shares, :price)",
@@ -253,7 +263,6 @@ def sell():
         else:
             db.execute("DELETE FROM portfolio WHERE id=:id AND symbol=:symbol", id=session['user_id'], symbol=stock['symbol'])
 
-        # return render_template("sell.html")
         return redirect("/")
     else:
         return render_template("sell.html", stocks=portfolio)
