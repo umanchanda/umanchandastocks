@@ -1,0 +1,176 @@
+{% extends "layout.html" %}
+
+{% block title %}
+    Buy Options
+{% endblock %}
+
+{% block main %}
+<div class="row justify-content-center">
+    <div class="col-md-7">
+        <h3 class="mb-4">Buy Options</h3>
+        <form id="options-buy-form" action="/options/buy" method="post">
+
+            <div class="form-group">
+                <label for="symbol">Ticker Symbol</label>
+                <input class="form-control" id="symbol" name="symbol" placeholder="e.g. AAPL" type="text" autocomplete="off" required>
+            </div>
+
+            <div class="form-group" id="expiration-group" style="display:none;">
+                <label for="expiration">Expiration Date</label>
+                <select class="form-control" id="expiration" name="expiration">
+                    <option value="">Loading…</option>
+                </select>
+            </div>
+
+            <div class="form-group" id="type-group" style="display:none;">
+                <label>Option Type</label>
+                <div>
+                    <div class="form-check form-check-inline">
+                        <input class="form-check-input" type="radio" name="option_type" id="type-call" value="call" checked>
+                        <label class="form-check-label" for="type-call">Call</label>
+                    </div>
+                    <div class="form-check form-check-inline">
+                        <input class="form-check-input" type="radio" name="option_type" id="type-put" value="put">
+                        <label class="form-check-label" for="type-put">Put</label>
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-group" id="strike-group" style="display:none;">
+                <label for="strike">Strike Price</label>
+                <select class="form-control" id="strike" name="strike">
+                    <option value="">Select expiration first</option>
+                </select>
+            </div>
+
+            <div class="form-group" id="contracts-group" style="display:none;">
+                <label for="contracts">Number of Contracts <small class="text-muted">(1 contract = 100 shares)</small></label>
+                <input class="form-control" id="contracts" name="contracts" type="number" min="1" step="1" value="1" required>
+            </div>
+
+            <div id="price-preview" class="alert alert-secondary" style="display:none;"></div>
+
+            <button class="btn btn-primary" id="submit-btn" type="submit" style="display:none;">Buy Options</button>
+        </form>
+    </div>
+</div>
+
+<script>
+(function () {
+    let chainData = null;
+
+    const symbolInput = document.getElementById('symbol');
+    const expirationGroup = document.getElementById('expiration-group');
+    const expirationSelect = document.getElementById('expiration');
+    const typeGroup = document.getElementById('type-group');
+    const strikeGroup = document.getElementById('strike-group');
+    const strikeSelect = document.getElementById('strike');
+    const contractsGroup = document.getElementById('contracts-group');
+    const pricePreview = document.getElementById('price-preview');
+    const submitBtn = document.getElementById('submit-btn');
+
+    let expirationTimer = null;
+
+    symbolInput.addEventListener('input', function () {
+        clearTimeout(expirationTimer);
+        const sym = this.value.trim().toUpperCase();
+        if (sym.length < 1) return;
+        expirationTimer = setTimeout(() => fetchExpirations(sym), 600);
+    });
+
+    function fetchExpirations(sym) {
+        expirationSelect.innerHTML = '<option value="">Loading…</option>';
+        expirationGroup.style.display = 'none';
+        typeGroup.style.display = 'none';
+        strikeGroup.style.display = 'none';
+        contractsGroup.style.display = 'none';
+        pricePreview.style.display = 'none';
+        submitBtn.style.display = 'none';
+        chainData = null;
+
+        fetch('/options/chain/' + encodeURIComponent(sym))
+            .then(r => r.json())
+            .then(data => {
+                if (data.error || !data.expirations || data.expirations.length === 0) {
+                    expirationSelect.innerHTML = '<option value="">No options available</option>';
+                    expirationGroup.style.display = 'block';
+                    return;
+                }
+                expirationSelect.innerHTML = data.expirations.map(
+                    e => `<option value="${e}">${e}</option>`
+                ).join('');
+                expirationGroup.style.display = 'block';
+                typeGroup.style.display = 'block';
+                fetchChain(sym, data.expirations[0]);
+            })
+            .catch(() => {
+                expirationSelect.innerHTML = '<option value="">Error fetching data</option>';
+                expirationGroup.style.display = 'block';
+            });
+    }
+
+    expirationSelect.addEventListener('change', function () {
+        const sym = symbolInput.value.trim().toUpperCase();
+        if (sym && this.value) fetchChain(sym, this.value);
+    });
+
+    document.querySelectorAll('input[name="option_type"]').forEach(radio => {
+        radio.addEventListener('change', () => populateStrikes());
+    });
+
+    function fetchChain(sym, expiration) {
+        strikeSelect.innerHTML = '<option value="">Loading…</option>';
+        strikeGroup.style.display = 'none';
+        contractsGroup.style.display = 'none';
+        pricePreview.style.display = 'none';
+        submitBtn.style.display = 'none';
+
+        fetch('/options/chain/' + encodeURIComponent(sym) + '/' + encodeURIComponent(expiration))
+            .then(r => r.json())
+            .then(data => {
+                if (data.error) {
+                    strikeSelect.innerHTML = '<option value="">Error</option>';
+                    strikeGroup.style.display = 'block';
+                    return;
+                }
+                chainData = data;
+                populateStrikes();
+            })
+            .catch(() => {
+                strikeSelect.innerHTML = '<option value="">Error fetching chain</option>';
+                strikeGroup.style.display = 'block';
+            });
+    }
+
+    function populateStrikes() {
+        if (!chainData) return;
+        const optType = document.querySelector('input[name="option_type"]:checked').value;
+        const rows = optType === 'call' ? chainData.calls : chainData.puts;
+        strikeSelect.innerHTML = rows.map(
+            r => `<option value="${r.strike}">${'$' + r.strike.toFixed(2)} — last $${r.lastPrice.toFixed(2)}, bid $${r.bid.toFixed(2)}, ask $${r.ask.toFixed(2)}</option>`
+        ).join('');
+        strikeGroup.style.display = 'block';
+        contractsGroup.style.display = 'block';
+        submitBtn.style.display = 'block';
+        updatePreview();
+    }
+
+    strikeSelect.addEventListener('change', updatePreview);
+    document.getElementById('contracts').addEventListener('input', updatePreview);
+
+    function updatePreview() {
+        if (!chainData) return;
+        const optType = document.querySelector('input[name="option_type"]:checked').value;
+        const rows = optType === 'call' ? chainData.calls : chainData.puts;
+        const strikeVal = parseFloat(strikeSelect.value);
+        const row = rows.find(r => r.strike === strikeVal);
+        if (!row) return;
+        const contracts = parseInt(document.getElementById('contracts').value) || 1;
+        const mid = row.lastPrice > 0 ? row.lastPrice : (row.bid + row.ask) / 2;
+        const total = mid * contracts * 100;
+        pricePreview.textContent = `Estimated cost: ${contracts} contract(s) × $${mid.toFixed(2)} premium × 100 = $${total.toFixed(2)}`;
+        pricePreview.style.display = 'block';
+    }
+})();
+</script>
+{% endblock %}

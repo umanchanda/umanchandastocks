@@ -1,17 +1,60 @@
 # umanchandastocks
 
-Stock Trading Application
+A paper trading application for stocks and options, built with Flask and PostgreSQL.
 
-To run this application:
+## Features
 
-Clone the repository in your desired directory
+- **Stocks**: Buy and sell stocks with real-time pricing via yfinance. Supports both share-count and dollar-amount orders, including fractional shares.
+- **Options**: Buy and sell call/put options with an AJAX-driven chain browser (expirations, strikes, live bid/ask). Positions and transaction history tracked separately.
+- **Portfolio**: Dashboard showing stock holdings, open options positions, and available cash.
+- **History**: Full transaction log for stock trades.
 
-Install needed dependencies with `pip3 install -r requirements.txt`
+## Running locally
 
-Run `flask run` to run the application
+1. Clone the repository:
+   ```bash
+   git clone https://github.com/umanchanda/umanchandastocks.git
+   cd umanchandastocks
+   ```
 
-Head over to `127.0.0.1:5000` to run the application in your browser
+2. Install dependencies:
+   ```bash
+   pip install -r requirements.txt
+   ```
 
-Enjoy!
+3. Set required environment variables:
+   ```bash
+   export SECRET_KEY="your-secret-key-here"
+   export DATABASE_URL="sqlite:///finance.db"   # or a PostgreSQL URL
+   ```
 
-This is also hosted at [umanchandastocks.herokuapp.com](https://umanchandastocks.herokuapp.com)
+4. Run the app:
+   ```bash
+   python application.py
+   ```
+
+5. Open `http://127.0.0.1:8000` in your browser.
+
+## Deployment
+
+The app is deployed on Heroku at [umanchandastocks.herokuapp.com](https://umanchandastocks.herokuapp.com).
+
+Set the following config vars in Heroku:
+- `SECRET_KEY` — a long random string
+- `DATABASE_URL` — provided automatically by a Postgres add-on
+
+## Project structure
+
+```
+application.py        # App factory: config, blueprint registration, error handler
+models.py             # SQLAlchemy models (User, Portfolio, Transaction, OptionPosition, OptionTransaction)
+helpers.py            # login_required decorator, stock lookup, USD formatter
+routes/
+  auth.py             # /register, /login, /logout
+  stocks.py           # /, /buy, /sell, /quote, /history
+  options.py          # /options/, /options/buy, /options/sell, /options/chain/...
+templates/
+  layout.html         # Base template with navbar and flash messages
+  options/            # Options-specific templates
+static/               # CSS
+```
