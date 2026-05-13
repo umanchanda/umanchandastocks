@@ -10,11 +10,11 @@
             <input autocomplete="off" autofocus class="form-control" name="symbol" placeholder="Symbol" type="text"/>
         </div>
 
-        <div class="btn-group btn-group-toggle mb-3 d-flex" data-toggle="buttons">
-            <label class="btn btn-outline-primary active w-50">
+        <div class="btn-group mb-3 d-flex">
+            <label class="btn btn-outline-primary active w-50" id="label-shares">
                 <input type="radio" name="mode" value="shares" checked> Shares
             </label>
-            <label class="btn btn-outline-primary w-50">
+            <label class="btn btn-outline-primary w-50" id="label-dollars">
                 <input type="radio" name="mode" value="dollars"> Dollar Amount
             </label>
         </div>
@@ -40,6 +40,8 @@
                 var isShares = this.value === 'shares';
                 document.getElementById('shares-input').style.display = isShares ? '' : 'none';
                 document.getElementById('dollars-input').style.display = isShares ? 'none' : '';
+                document.getElementById('label-shares').classList.toggle('active', isShares);
+                document.getElementById('label-dollars').classList.toggle('active', !isShares);
             });
         });
     </script>
