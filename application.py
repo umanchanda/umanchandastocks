@@ -2,7 +2,7 @@
 import os
 from tempfile import mkdtemp
 
-from flask import Flask, redirect, render_template, request, session
+from flask import Flask, flash, redirect, render_template, request, session
 from flask_session import Session
 from werkzeug.exceptions import default_exceptions
 from werkzeug.security import check_password_hash, generate_password_hash
@@ -61,31 +61,37 @@ def buy():
     if request.method == "POST":
         symbol = request.form.get("symbol", "").strip().upper()
         if not symbol:
-            return apology("Must provide a stock symbol", 400)
+            flash("Must provide a stock symbol", "error")
+            return redirect("/buy")
 
         stock = lookup(symbol)
         if not stock:
-            return apology("Stock not found", 400)
+            flash("Stock not found", "error")
+            return redirect("/buy")
 
         mode = request.form.get("mode", "shares")
         try:
             if mode == "dollars":
                 dollars = float(request.form.get("dollars"))
                 if dollars <= 0:
-                    return apology("Amount must be a positive number", 400)
+                    flash("Amount must be a positive number", "error")
+                    return redirect("/buy")
                 shares = dollars / stock["price"]
             else:
                 shares = float(request.form.get("shares"))
                 if shares <= 0:
-                    return apology("Shares must be a positive number", 400)
+                    flash("Shares must be a positive number", "error")
+                    return redirect("/buy")
         except (ValueError, TypeError):
-            return apology("Invalid amount", 400)
+            flash("Invalid amount", "error")
+            return redirect("/buy")
 
         user = User.query.get(session["user_id"])
         cost = shares * stock["price"]
 
         if float(user.cash) < cost:
-            return apology("Insufficient funds", 400)
+            flash("Insufficient funds", "error")
+            return redirect("/buy")
 
         user.cash = float(user.cash) - cost
 
@@ -114,24 +120,30 @@ def sell():
     if request.method == "POST":
         symbol = request.form.get("symbol", "").strip().upper()
         if not symbol:
-            return apology("Must provide a stock symbol", 400)
+            flash("Must provide a stock symbol", "error")
+            return redirect("/sell")
 
         stock = lookup(symbol)
         if not stock:
-            return apology("Invalid stock", 400)
+            flash("Invalid stock", "error")
+            return redirect("/sell")
 
         holding = Portfolio.query.filter_by(user_id=user.id, symbol=symbol).first()
         if not holding:
-            return apology("You don't own that stock", 400)
+            flash("You don't own that stock", "error")
+            return redirect("/sell")
 
         try:
             shares = float(request.form.get("shares"))
             if shares <= 0:
-                return apology("Shares must be a positive number", 400)
+                flash("Shares must be a positive number", "error")
+                return redirect("/sell")
             if shares > float(holding.shares):
-                return apology("Not enough shares", 400)
+                flash("Not enough shares", "error")
+                return redirect("/sell")
         except (ValueError, TypeError):
-            return apology("Invalid number of shares", 400)
+            flash("Invalid number of shares", "error")
+            return redirect("/sell")
 
         user.cash = float(user.cash) + shares * stock["price"]
 
@@ -156,10 +168,12 @@ def quote():
     if request.method == "POST":
         symbol = request.form.get("symbol", "").strip().upper()
         if not symbol:
-            return apology("Must provide a stock symbol", 400)
+            flash("Must provide a stock symbol", "error")
+            return redirect("/quote")
         stock = lookup(symbol)
         if not stock:
-            return apology("Stock not found", 400)
+            flash("Stock not found", "error")
+            return redirect("/quote")
         return render_template("quoted.html", stock=stock)
     return render_template("quote.html")
 
@@ -174,15 +188,20 @@ def register():
         confirmation = request.form.get("confirmation", "")
 
         if not username:
-            return apology("Must provide username", 400)
+            flash("Must provide username", "error")
+            return redirect("/register")
         if not password:
-            return apology("Must provide password", 400)
+            flash("Must provide password", "error")
+            return redirect("/register")
         if len(password) < 8:
-            return apology("Password must be at least 8 characters", 400)
+            flash("Password must be at least 8 characters", "error")
+            return redirect("/register")
         if password != confirmation:
-            return apology("Passwords do not match", 400)
+            flash("Passwords do not match", "error")
+            return redirect("/register")
         if User.query.filter_by(username=username).first():
-            return apology("Username already taken", 400)
+            flash("Username already taken", "error")
+            return redirect("/register")
 
         user = User(username=username, hash=generate_password_hash(password))
         db.session.add(user)
@@ -202,13 +221,16 @@ def login():
         password = request.form.get("password", "")
 
         if not username:
-            return apology("Must provide username", 403)
+            flash("Must provide username", "error")
+            return redirect("/login")
         if not password:
-            return apology("Must provide password", 403)
+            flash("Must provide password", "error")
+            return redirect("/login")
 
         user = User.query.filter_by(username=username).first()
         if not user or not check_password_hash(user.hash, password):
-            return apology("Invalid username or password", 403)
+            flash("Invalid username or password", "error")
+            return redirect("/login")
 
         session["user_id"] = user.id
         return redirect("/")

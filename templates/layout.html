@@ -48,13 +48,20 @@
             </div>
         </nav>
 
-        {% if get_flashed_messages() %}
-            <header>
-                <div class="alert alert-primary border text-center" role="alert">
-                    {{ get_flashed_messages() | join(" ") }}
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                <div class="container pt-3">
+                    {% for category, message in messages %}
+                        <div class="alert alert-{{ 'danger' if category == 'error' else 'info' }} alert-dismissible fade show" role="alert">
+                            {{ message }}
+                            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                                <span aria-hidden="true">&times;</span>
+                            </button>
+                        </div>
+                    {% endfor %}
                 </div>
-            </header>
-        {% endif %}
+            {% endif %}
+        {% endwith %}
 
         <main class="container p-5">
             {% block main %}{% endblock %}
