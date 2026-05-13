@@ -91,7 +91,7 @@ def buy():
 
         holding = Portfolio.query.filter_by(user_id=user.id, symbol=symbol).first()
         if holding:
-            holding.shares += shares
+            holding.shares = float(holding.shares) + shares
             holding.total = holding.shares * stock["price"]
         else:
             db.session.add(Portfolio(user_id=user.id, symbol=symbol,
