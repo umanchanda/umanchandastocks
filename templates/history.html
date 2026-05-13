@@ -19,12 +19,12 @@
                 <td colspan="4"></td>
             </tr>
         </tfoot>
-        {% for history in histories %}
+        {% for tx in transactions %}
         <tr>
-            <td>{{ history.symbol }}</td>
-            <td>{{ history.shares }}</td>
-            <td>{{ history.price }}</td>
-            <td>{{ history.datetime }}</td>
+            <td>{{ tx.symbol }}</td>
+            <td>{{ tx.shares }}</td>
+            <td>{{ tx.price }}</td>
+            <td>{{ tx.datetime }}</td>
         </tr>
         {% endfor %}
     </table>
