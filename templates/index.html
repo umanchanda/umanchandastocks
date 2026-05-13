@@ -20,12 +20,12 @@
                 <td><b>{{ total }}</b></td>
             </tr>
         </tfoot>
-        {% for stock in stocks %}
+        {% for holding in holdings %}
         <tr>
-            <td>{{ stock.symbol }}</td>
-            <td>{{ stock.shares }}</td>
-            <td>{{ stock.price }}</td>
-            <td>{{ stock.total }}</td>
+            <td>{{ holding.symbol }}</td>
+            <td>{{ holding.shares }}</td>
+            <td>{{ holding.price }}</td>
+            <td>{{ holding.total }}</td>
         </tr>
         {% endfor %}
         <tr>

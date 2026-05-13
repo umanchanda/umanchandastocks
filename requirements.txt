@@ -1,4 +1,4 @@
-cs50
 Flask
+Flask-SQLAlchemy
 Flask-Session
 psycopg2-binary
