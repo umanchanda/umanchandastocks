@@ -67,12 +67,19 @@ def buy():
         if not stock:
             return apology("Stock not found", 400)
 
+        mode = request.form.get("mode", "shares")
         try:
-            shares = float(request.form.get("shares"))
-            if shares <= 0:
-                return apology("Shares must be a positive number", 400)
+            if mode == "dollars":
+                dollars = float(request.form.get("dollars"))
+                if dollars <= 0:
+                    return apology("Amount must be a positive number", 400)
+                shares = dollars / stock["price"]
+            else:
+                shares = float(request.form.get("shares"))
+                if shares <= 0:
+                    return apology("Shares must be a positive number", 400)
         except (ValueError, TypeError):
-            return apology("Invalid number of shares", 400)
+            return apology("Invalid amount", 400)
 
         user = User.query.get(session["user_id"])
         cost = shares * stock["price"]
