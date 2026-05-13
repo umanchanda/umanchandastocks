@@ -22,7 +22,7 @@ class Portfolio(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=False)
     symbol = db.Column(db.String(10), nullable=False)
-    shares = db.Column(db.Integer, nullable=False)
+    shares = db.Column(db.Numeric(12, 4), nullable=False)
     price = db.Column(db.Numeric(12, 2), nullable=False)
     total = db.Column(db.Numeric(12, 2), nullable=False)
 
@@ -33,6 +33,6 @@ class Transaction(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=False)
     symbol = db.Column(db.String(10), nullable=False)
-    shares = db.Column(db.Integer, nullable=False)
+    shares = db.Column(db.Numeric(12, 4), nullable=False)
     price = db.Column(db.Numeric(12, 2), nullable=False)
     datetime = db.Column(db.DateTime, default=lambda: datetime.now(timezone.utc))
