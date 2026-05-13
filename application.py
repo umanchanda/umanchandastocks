@@ -68,7 +68,7 @@ def buy():
             return apology("Stock not found", 400)
 
         try:
-            shares = int(request.form.get("shares"))
+            shares = float(request.form.get("shares"))
             if shares <= 0:
                 return apology("Shares must be a positive number", 400)
         except (ValueError, TypeError):
@@ -118,21 +118,22 @@ def sell():
             return apology("You don't own that stock", 400)
 
         try:
-            shares = int(request.form.get("shares"))
+            shares = float(request.form.get("shares"))
             if shares <= 0:
                 return apology("Shares must be a positive number", 400)
-            if shares > holding.shares:
+            if shares > float(holding.shares):
                 return apology("Not enough shares", 400)
         except (ValueError, TypeError):
             return apology("Invalid number of shares", 400)
 
         user.cash = float(user.cash) + shares * stock["price"]
 
-        if shares == holding.shares:
+        new_shares = float(holding.shares) - shares
+        if new_shares < 0.0001:
             db.session.delete(holding)
         else:
-            holding.shares -= shares
-            holding.total = holding.shares * stock["price"]
+            holding.shares = new_shares
+            holding.total = new_shares * stock["price"]
 
         db.session.add(Transaction(user_id=user.id, symbol=symbol,
                                    shares=-shares, price=stock["price"]))
