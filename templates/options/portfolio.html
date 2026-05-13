@@ -1,0 +1,76 @@
+{% extends "layout.html" %}
+
+{% block title %}
+    Options Portfolio
+{% endblock %}
+
+{% block main %}
+<h3 class="mb-3">Open Positions</h3>
+
+{% if positions %}
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>Symbol</th>
+            <th>Type</th>
+            <th>Strike</th>
+            <th>Expiration</th>
+            <th>Contracts</th>
+            <th>Avg Premium</th>
+            <th>Total Cost</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for pos in positions %}
+        <tr>
+            <td>{{ pos.symbol }}</td>
+            <td>{{ pos.option_type | capitalize }}</td>
+            <td>{{ pos.strike | usd }}</td>
+            <td>{{ pos.expiration }}</td>
+            <td>{{ pos.contracts }}</td>
+            <td>{{ pos.premium | usd }}</td>
+            <td>{{ pos.total_cost | usd }}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% else %}
+<p class="text-muted">No open options positions.</p>
+<a class="btn btn-primary" href="/options/buy">Buy Options</a>
+{% endif %}
+
+<h3 class="mt-5 mb-3">Transaction History</h3>
+
+{% if transactions %}
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>Date / Time</th>
+            <th>Symbol</th>
+            <th>Type</th>
+            <th>Strike</th>
+            <th>Expiration</th>
+            <th>Contracts</th>
+            <th>Premium</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for tx in transactions %}
+        <tr>
+            <td>{{ tx.datetime.strftime('%Y-%m-%d %H:%M') if tx.datetime else '—' }}</td>
+            <td>{{ tx.symbol }}</td>
+            <td>{{ tx.option_type | capitalize }}</td>
+            <td>{{ tx.strike | usd }}</td>
+            <td>{{ tx.expiration }}</td>
+            <td class="{{ 'text-danger' if tx.contracts < 0 else 'text-success' }}">
+                {{ tx.contracts }}
+            </td>
+            <td>{{ tx.premium | usd }}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% else %}
+<p class="text-muted">No options transactions yet.</p>
+{% endif %}
+{% endblock %}

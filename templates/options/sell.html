@@ -1,0 +1,38 @@
+{% extends "layout.html" %}
+
+{% block title %}
+    Sell Options
+{% endblock %}
+
+{% block main %}
+<div class="row justify-content-center">
+    <div class="col-md-7">
+        <h3 class="mb-4">Sell Options</h3>
+
+        {% if positions %}
+        <form action="/options/sell" method="post">
+            <div class="form-group">
+                <label for="position_id">Position</label>
+                <select class="form-control" id="position_id" name="position_id" required>
+                    {% for pos in positions %}
+                    <option value="{{ pos.id }}">
+                        {{ pos.symbol }} {{ pos.option_type | capitalize }} ${{ pos.strike }} exp {{ pos.expiration }} — {{ pos.contracts }} contract(s)
+                    </option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="contracts">Contracts to Sell</label>
+                <input class="form-control" id="contracts" name="contracts" type="number" min="1" step="1" value="1" required>
+            </div>
+
+            <button class="btn btn-danger" type="submit">Sell Options</button>
+        </form>
+        {% else %}
+        <p class="text-muted">You have no open options positions.</p>
+        <a class="btn btn-primary" href="/options/buy">Buy Options</a>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

@@ -1,10 +1,11 @@
 {% extends "layout.html" %}
 
 {% block title %}
-    Index
+    Portfolio
 {% endblock %}
 
 {% block main %}
+    <h3 class="mb-3">Stock Holdings</h3>
     <table class="table table-striped">
         <thead>
             <tr>
@@ -14,25 +15,55 @@
                 <th>Total</th>
             </tr>
         </thead>
-        <tfoot>
-            <tr>
-                <td colspan="3"></td>
-                <td><b>{{ total }}</b></td>
-            </tr>
-        </tfoot>
         {% for holding in holdings %}
         <tr>
             <td>{{ holding.symbol }}</td>
-            <td>{{ holding.shares }}</td>
-            <td>{{ holding.price }}</td>
-            <td>{{ holding.total }}</td>
+            <td>{{ "%.4f"|format(holding.shares|float) }}</td>
+            <td>{{ holding.price | usd }}</td>
+            <td>{{ holding.total | usd }}</td>
         </tr>
         {% endfor %}
         <tr>
-            <td>CASH</td>
+            <td><strong>CASH</strong></td>
             <td></td>
             <td></td>
-            <td>{{ cash }}</td>
+            <td>{{ cash | usd }}</td>
         </tr>
+        <tfoot>
+            <tr>
+                <td colspan="3"><strong>Total</strong></td>
+                <td><strong>{{ total | usd }}</strong></td>
+            </tr>
+        </tfoot>
     </table>
+
+    {% if option_positions %}
+    <h3 class="mt-4 mb-3">Options Positions</h3>
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>Symbol</th>
+                <th>Type</th>
+                <th>Strike</th>
+                <th>Expiration</th>
+                <th>Contracts</th>
+                <th>Avg Premium</th>
+                <th>Total Cost</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for pos in option_positions %}
+            <tr>
+                <td>{{ pos.symbol }}</td>
+                <td>{{ pos.option_type | capitalize }}</td>
+                <td>{{ pos.strike | usd }}</td>
+                <td>{{ pos.expiration }}</td>
+                <td>{{ pos.contracts }}</td>
+                <td>{{ pos.premium | usd }}</td>
+                <td>{{ pos.total_cost | usd }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% endif %}
 {% endblock %}

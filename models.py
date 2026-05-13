@@ -36,3 +36,31 @@ class Transaction(db.Model):
     shares = db.Column(db.Numeric(12, 4), nullable=False)
     price = db.Column(db.Numeric(12, 2), nullable=False)
     datetime = db.Column(db.DateTime, default=lambda: datetime.now(timezone.utc))
+
+
+class OptionPosition(db.Model):
+    __tablename__ = "option_positions"
+
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=False)
+    symbol = db.Column(db.String(10), nullable=False)
+    option_type = db.Column(db.String(4), nullable=False)   # 'call' or 'put'
+    strike = db.Column(db.Numeric(12, 2), nullable=False)
+    expiration = db.Column(db.Date, nullable=False)
+    contracts = db.Column(db.Integer, nullable=False)
+    premium = db.Column(db.Numeric(12, 4), nullable=False)  # per share at purchase
+    total_cost = db.Column(db.Numeric(12, 2), nullable=False)
+
+
+class OptionTransaction(db.Model):
+    __tablename__ = "option_transactions"
+
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=False)
+    symbol = db.Column(db.String(10), nullable=False)
+    option_type = db.Column(db.String(4), nullable=False)
+    strike = db.Column(db.Numeric(12, 2), nullable=False)
+    expiration = db.Column(db.Date, nullable=False)
+    contracts = db.Column(db.Integer, nullable=False)  # negative = sell/close
+    premium = db.Column(db.Numeric(12, 4), nullable=False)
+    datetime = db.Column(db.DateTime, default=lambda: datetime.now(timezone.utc))
