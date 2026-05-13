@@ -12,7 +12,10 @@ from models import db, User, Portfolio, Transaction
 
 app = Flask(__name__)
 
-app.config["SECRET_KEY"] = os.environ.get("SECRET_KEY", os.urandom(24))
+secret_key = os.environ.get("SECRET_KEY")
+if not secret_key:
+    raise RuntimeError("SECRET_KEY environment variable is not set")
+app.config["SECRET_KEY"] = secret_key
 
 # psycopg2 does not support the channel_binding parameter; strip it if present
 _db_url = os.environ.get("DATABASE_URL", "sqlite:///finance.db")
@@ -48,7 +51,7 @@ def after_request(response):
 @app.route("/")
 @login_required
 def index():
-    user = User.query.get(session["user_id"])
+    user = db.session.get(User, session["user_id"])
     holdings = Portfolio.query.filter_by(user_id=user.id).all()
     stocks_value = sum(float(h.total) for h in holdings)
     total = float(user.cash) + stocks_value
@@ -86,7 +89,7 @@ def buy():
             flash("Invalid amount", "error")
             return redirect("/buy")
 
-        user = User.query.get(session["user_id"])
+        user = db.session.get(User, session["user_id"])
         cost = shares * stock["price"]
 
         if float(user.cash) < cost:
@@ -114,7 +117,7 @@ def buy():
 @app.route("/sell", methods=["GET", "POST"])
 @login_required
 def sell():
-    user = User.query.get(session["user_id"])
+    user = db.session.get(User, session["user_id"])
     holdings = Portfolio.query.filter_by(user_id=user.id).all()
 
     if request.method == "POST":
