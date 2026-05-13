@@ -13,7 +13,16 @@ from models import db, User, Portfolio, Transaction
 app = Flask(__name__)
 
 app.config["SECRET_KEY"] = os.environ.get("SECRET_KEY", os.urandom(24))
-app.config["SQLALCHEMY_DATABASE_URI"] = os.environ.get("DATABASE_URL", "sqlite:///finance.db")
+
+# psycopg2 does not support the channel_binding parameter; strip it if present
+_db_url = os.environ.get("DATABASE_URL", "sqlite:///finance.db")
+if "channel_binding" in _db_url:
+    from urllib.parse import urlparse, urlencode, parse_qs, urlunparse
+    _parsed = urlparse(_db_url)
+    _params = {k: v[0] for k, v in parse_qs(_parsed.query).items() if k != "channel_binding"}
+    _db_url = urlunparse(_parsed._replace(query=urlencode(_params)))
+
+app.config["SQLALCHEMY_DATABASE_URI"] = _db_url
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 app.config["SESSION_FILE_DIR"] = mkdtemp()
 app.config["SESSION_PERMANENT"] = False
