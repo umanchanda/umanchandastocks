@@ -8,8 +8,6 @@ auth_bp = Blueprint("auth", __name__)
 
 @auth_bp.route("/register", methods=["GET", "POST"])
 def register():
-    session.clear()
-
     if request.method == "POST":
         username = request.form.get("username", "").strip()
         password = request.form.get("password", "")
@@ -40,6 +38,7 @@ def register():
             flash("An error occurred. Please try again.", "error")
             return redirect("/register")
 
+        session.clear()
         session["user_id"] = user.id
         return redirect("/")
 
@@ -48,8 +47,6 @@ def register():
 
 @auth_bp.route("/login", methods=["GET", "POST"])
 def login():
-    session.clear()
-
     if request.method == "POST":
         username = request.form.get("username", "").strip()
         password = request.form.get("password", "")
@@ -71,6 +68,7 @@ def login():
             flash("Invalid username or password", "error")
             return redirect("/login")
 
+        session.clear()
         session["user_id"] = user.id
         return redirect("/")
 
