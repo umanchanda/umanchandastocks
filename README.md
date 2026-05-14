@@ -26,14 +26,6 @@ A paper trading application for stocks and options, built with Flask and Postgre
    ```bash
    export SECRET_KEY="your-secret-key-here"
    export DATABASE_URL="sqlite:///finance.db"   # or a PostgreSQL URL
-
-   # Optional — required for password reset emails
-   export MAIL_SERVER="smtp.gmail.com"
-   export MAIL_PORT="587"
-   export MAIL_USE_TLS="true"
-   export MAIL_USERNAME="you@example.com"
-   export MAIL_PASSWORD="your-app-password"
-   export MAIL_DEFAULT_SENDER="you@example.com"
    ```
 
 4. Run the app:
@@ -50,7 +42,6 @@ The app is deployed on Heroku at [umanchandastocks.herokuapp.com](https://umanch
 Set the following config vars in Heroku:
 - `SECRET_KEY` — a long random string
 - `DATABASE_URL` — provided automatically by a Postgres add-on
-- `MAIL_SERVER`, `MAIL_PORT`, `MAIL_USE_TLS`, `MAIL_USERNAME`, `MAIL_PASSWORD`, `MAIL_DEFAULT_SENDER` — SMTP credentials for password reset emails (e.g. SendGrid or Gmail)
 
 ## Project structure
 

@@ -1,7 +1,5 @@
 Flask
-Flask-Mail
 Flask-SQLAlchemy
 Flask-Session
-itsdangerous
 psycopg2-binary
 yfinance

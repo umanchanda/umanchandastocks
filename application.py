@@ -2,7 +2,6 @@ import os
 from tempfile import mkdtemp
 
 from flask import Flask
-from flask_mail import Mail
 from flask_session import Session
 from werkzeug.exceptions import default_exceptions
 
@@ -32,26 +31,13 @@ app.config["SESSION_FILE_DIR"] = mkdtemp()
 app.config["SESSION_PERMANENT"] = False
 app.config["SESSION_TYPE"] = "filesystem"
 
-app.config["MAIL_SERVER"] = os.environ.get("MAIL_SERVER", "smtp.gmail.com")
-app.config["MAIL_PORT"] = int(os.environ.get("MAIL_PORT", 587))
-app.config["MAIL_USE_TLS"] = os.environ.get("MAIL_USE_TLS", "true").lower() == "true"
-app.config["MAIL_USERNAME"] = os.environ.get("MAIL_USERNAME")
-app.config["MAIL_PASSWORD"] = os.environ.get("MAIL_PASSWORD")
-app.config["MAIL_DEFAULT_SENDER"] = os.environ.get("MAIL_DEFAULT_SENDER",
-                                                    os.environ.get("MAIL_USERNAME"))
-
 db.init_app(app)
-mail = Mail(app)
 Session(app)
 app.jinja_env.filters["usd"] = usd
 
 app.register_blueprint(auth_bp)
 app.register_blueprint(stocks_bp)
 app.register_blueprint(options_bp)
-
-# Pass mail instance to auth blueprint after registration
-from routes.auth import set_mail
-set_mail(mail)
 
 with app.app_context():
     db.create_all()
