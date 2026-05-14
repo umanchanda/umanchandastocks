@@ -1,31 +1,45 @@
 {% extends "layout.html" %}
 
-{% block title %}
-    History
-{% endblock %}
+{% block title %}History{% endblock %}
 
 {% block main %}
-    <table class="table table-striped">
-        <thead>
+<h2 class="section-heading">Transaction History</h2>
+
+{% if transactions %}
+<div class="table-responsive">
+    <table class="table table-hover bg-white rounded shadow-sm">
+        <thead class="table-light">
             <tr>
+                <th>Date / Time</th>
                 <th>Symbol</th>
-                <th>Shares</th>
-                <th>Price</th>
-                <th>Datetime</th>
+                <th>Action</th>
+                <th class="text-end">Shares</th>
+                <th class="text-end">Price</th>
+                <th class="text-end">Total</th>
             </tr>
         </thead>
-        <tfoot>
+        <tbody>
+            {% for tx in transactions %}
+            {% set is_buy = tx.shares | float > 0 %}
             <tr>
-                <td colspan="4"></td>
+                <td class="text-muted small">{{ tx.datetime.strftime('%Y-%m-%d %H:%M') if tx.datetime else '—' }}</td>
+                <td><strong>{{ tx.symbol }}</strong></td>
+                <td>
+                    <span class="badge {{ 'bg-success' if is_buy else 'bg-danger' }}">
+                        {{ 'Buy' if is_buy else 'Sell' }}
+                    </span>
+                </td>
+                <td class="text-end {{ 'text-buy' if is_buy else 'text-sell' }}">
+                    {{ "%.4f" | format((tx.shares | float) | abs) }}
+                </td>
+                <td class="text-end">{{ tx.price | usd }}</td>
+                <td class="text-end">{{ ((tx.shares | float) | abs * (tx.price | float)) | usd }}</td>
             </tr>
-        </tfoot>
-        {% for tx in transactions %}
-        <tr>
-            <td>{{ tx.symbol }}</td>
-            <td>{{ tx.shares }}</td>
-            <td>{{ tx.price }}</td>
-            <td>{{ tx.datetime }}</td>
-        </tr>
-        {% endfor %}
+            {% endfor %}
+        </tbody>
     </table>
+</div>
+{% else %}
+<p class="text-muted">No transactions yet. <a href="/buy">Buy some stocks</a>.</p>
+{% endif %}
 {% endblock %}

@@ -1,69 +1,88 @@
 {% extends "layout.html" %}
 
-{% block title %}
-    Portfolio
-{% endblock %}
+{% block title %}Portfolio{% endblock %}
 
 {% block main %}
-    <h3 class="mb-3">Stock Holdings</h3>
-    <table class="table table-striped">
-        <thead>
+
+<div class="row g-3 mb-4">
+    <div class="col-sm-4">
+        <div class="stat-card">
+            <div class="label">Cash</div>
+            <div class="value">{{ cash | usd }}</div>
+        </div>
+    </div>
+    <div class="col-sm-4">
+        <div class="stat-card">
+            <div class="label">Stocks Value</div>
+            <div class="value">{{ (total - cash|float) | usd }}</div>
+        </div>
+    </div>
+    <div class="col-sm-4">
+        <div class="stat-card">
+            <div class="label">Total Portfolio</div>
+            <div class="value">{{ total | usd }}</div>
+        </div>
+    </div>
+</div>
+
+<h2 class="section-heading">Stock Holdings</h2>
+{% if holdings %}
+<div class="table-responsive">
+    <table class="table table-hover bg-white rounded shadow-sm">
+        <thead class="table-light">
             <tr>
                 <th>Symbol</th>
-                <th>Shares</th>
-                <th>Price</th>
-                <th>Total</th>
+                <th class="text-end">Shares</th>
+                <th class="text-end">Price</th>
+                <th class="text-end">Total Value</th>
             </tr>
         </thead>
-        {% for holding in holdings %}
-        <tr>
-            <td>{{ holding.symbol }}</td>
-            <td>{{ "%.4f"|format(holding.shares|float) }}</td>
-            <td>{{ holding.price | usd }}</td>
-            <td>{{ holding.total | usd }}</td>
-        </tr>
-        {% endfor %}
-        <tr>
-            <td><strong>CASH</strong></td>
-            <td></td>
-            <td></td>
-            <td>{{ cash | usd }}</td>
-        </tr>
-        <tfoot>
+        <tbody>
+            {% for holding in holdings %}
             <tr>
-                <td colspan="3"><strong>Total</strong></td>
-                <td><strong>{{ total | usd }}</strong></td>
+                <td><strong>{{ holding.symbol }}</strong></td>
+                <td class="text-end">{{ "%.4f" | format(holding.shares | float) }}</td>
+                <td class="text-end">{{ holding.price | usd }}</td>
+                <td class="text-end">{{ holding.total | usd }}</td>
             </tr>
-        </tfoot>
+            {% endfor %}
+        </tbody>
     </table>
+</div>
+{% else %}
+<p class="text-muted">No stock holdings yet. <a href="/buy">Buy some stocks</a>.</p>
+{% endif %}
 
-    {% if option_positions %}
-    <h3 class="mt-4 mb-3">Options Positions</h3>
-    <table class="table table-striped">
-        <thead>
+{% if option_positions %}
+<h2 class="section-heading mt-5">Options Positions</h2>
+<div class="table-responsive">
+    <table class="table table-hover bg-white rounded shadow-sm">
+        <thead class="table-light">
             <tr>
                 <th>Symbol</th>
                 <th>Type</th>
-                <th>Strike</th>
+                <th class="text-end">Strike</th>
                 <th>Expiration</th>
-                <th>Contracts</th>
-                <th>Avg Premium</th>
-                <th>Total Cost</th>
+                <th class="text-end">Contracts</th>
+                <th class="text-end">Avg Premium</th>
+                <th class="text-end">Total Cost</th>
             </tr>
         </thead>
         <tbody>
             {% for pos in option_positions %}
             <tr>
-                <td>{{ pos.symbol }}</td>
-                <td>{{ pos.option_type | capitalize }}</td>
-                <td>{{ pos.strike | usd }}</td>
+                <td><strong>{{ pos.symbol }}</strong></td>
+                <td><span class="badge {{ 'bg-success' if pos.option_type == 'call' else 'bg-danger' }}">{{ pos.option_type | capitalize }}</span></td>
+                <td class="text-end">{{ pos.strike | usd }}</td>
                 <td>{{ pos.expiration }}</td>
-                <td>{{ pos.contracts }}</td>
-                <td>{{ pos.premium | usd }}</td>
-                <td>{{ pos.total_cost | usd }}</td>
+                <td class="text-end">{{ pos.contracts }}</td>
+                <td class="text-end">{{ pos.premium | usd }}</td>
+                <td class="text-end">{{ pos.total_cost | usd }}</td>
             </tr>
             {% endfor %}
         </tbody>
     </table>
-    {% endif %}
+</div>
+{% endif %}
+
 {% endblock %}

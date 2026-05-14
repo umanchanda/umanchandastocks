@@ -1,57 +1,56 @@
 {% extends "layout.html" %}
 
-{% block title %}
-    Buy Options
-{% endblock %}
+{% block title %}Buy Options{% endblock %}
 
 {% block main %}
 <div class="row justify-content-center">
-    <div class="col-md-7">
-        <h3 class="mb-4">Buy Options</h3>
-        <form id="options-buy-form" action="/options/buy" method="post">
+    <div class="col-md-7 col-lg-6">
+        <div class="form-card">
+            <h4 class="mb-4 fw-bold">Buy Options</h4>
+            <form id="options-buy-form" action="/options/buy" method="post">
 
-            <div class="form-group">
-                <label for="symbol">Ticker Symbol</label>
-                <input class="form-control" id="symbol" name="symbol" placeholder="e.g. AAPL" type="text" autocomplete="off" required>
-            </div>
+                <div class="mb-3">
+                    <label class="form-label" for="symbol">Ticker Symbol</label>
+                    <input class="form-control text-uppercase" id="symbol" name="symbol" placeholder="e.g. AAPL" type="text" autocomplete="off" required>
+                </div>
 
-            <div class="form-group" id="expiration-group" style="display:none;">
-                <label for="expiration">Expiration Date</label>
-                <select class="form-control" id="expiration" name="expiration">
-                    <option value="">Loading…</option>
-                </select>
-            </div>
+                <div class="mb-3" id="expiration-group" style="display:none;">
+                    <label class="form-label" for="expiration">Expiration Date</label>
+                    <select class="form-select" id="expiration" name="expiration">
+                        <option value="">Loading…</option>
+                    </select>
+                </div>
 
-            <div class="form-group" id="type-group" style="display:none;">
-                <label>Option Type</label>
-                <div>
-                    <div class="form-check form-check-inline">
-                        <input class="form-check-input" type="radio" name="option_type" id="type-call" value="call" checked>
-                        <label class="form-check-label" for="type-call">Call</label>
-                    </div>
-                    <div class="form-check form-check-inline">
-                        <input class="form-check-input" type="radio" name="option_type" id="type-put" value="put">
-                        <label class="form-check-label" for="type-put">Put</label>
+                <div class="mb-3" id="type-group" style="display:none;">
+                    <label class="form-label">Option Type</label>
+                    <div class="btn-group w-100" role="group">
+                        <input type="radio" class="btn-check" name="option_type" id="type-call" value="call" checked>
+                        <label class="btn btn-outline-success" for="type-call">Call</label>
+                        <input type="radio" class="btn-check" name="option_type" id="type-put" value="put">
+                        <label class="btn btn-outline-danger" for="type-put">Put</label>
                     </div>
                 </div>
-            </div>
 
-            <div class="form-group" id="strike-group" style="display:none;">
-                <label for="strike">Strike Price</label>
-                <select class="form-control" id="strike" name="strike">
-                    <option value="">Select expiration first</option>
-                </select>
-            </div>
+                <div class="mb-3" id="strike-group" style="display:none;">
+                    <label class="form-label" for="strike">Strike Price</label>
+                    <select class="form-select" id="strike" name="strike">
+                        <option value="">Select expiration first</option>
+                    </select>
+                </div>
 
-            <div class="form-group" id="contracts-group" style="display:none;">
-                <label for="contracts">Number of Contracts <small class="text-muted">(1 contract = 100 shares)</small></label>
-                <input class="form-control" id="contracts" name="contracts" type="number" min="1" step="1" value="1" required>
-            </div>
+                <div class="mb-3" id="contracts-group" style="display:none;">
+                    <label class="form-label" for="contracts">
+                        Contracts
+                        <span class="text-muted fw-normal small">— 1 contract = 100 shares</span>
+                    </label>
+                    <input class="form-control" id="contracts" name="contracts" type="number" min="1" step="1" value="1" required>
+                </div>
 
-            <div id="price-preview" class="alert alert-secondary" style="display:none;"></div>
+                <div id="price-preview" class="alert alert-secondary small" style="display:none;"></div>
 
-            <button class="btn btn-primary" id="submit-btn" type="submit" style="display:none;">Buy Options</button>
-        </form>
+                <button class="btn btn-success w-100 mt-2" id="submit-btn" type="submit" style="display:none;">Buy Options</button>
+            </form>
+        </div>
     </div>
 </div>
 
@@ -129,7 +128,7 @@
             .then(r => r.json())
             .then(data => {
                 if (data.error) {
-                    strikeSelect.innerHTML = '<option value="">Error</option>';
+                    strikeSelect.innerHTML = '<option value="">Error loading chain</option>';
                     strikeGroup.style.display = 'block';
                     return;
                 }
@@ -146,8 +145,8 @@
         if (!chainData) return;
         const optType = document.querySelector('input[name="option_type"]:checked').value;
         const rows = optType === 'call' ? chainData.calls : chainData.puts;
-        strikeSelect.innerHTML = rows.map(
-            r => `<option value="${r.strike}">${'$' + r.strike.toFixed(2)} — last $${r.lastPrice.toFixed(2)}, bid $${r.bid.toFixed(2)}, ask $${r.ask.toFixed(2)}</option>`
+        strikeSelect.innerHTML = rows.map(r =>
+            `<option value="${r.strike}">$${r.strike.toFixed(2)} — last $${r.lastPrice.toFixed(2)}, bid $${r.bid.toFixed(2)}, ask $${r.ask.toFixed(2)}</option>`
         ).join('');
         strikeGroup.style.display = 'block';
         contractsGroup.style.display = 'block';
@@ -168,7 +167,7 @@
         const contracts = parseInt(document.getElementById('contracts').value) || 1;
         const mid = row.lastPrice > 0 ? row.lastPrice : (row.bid + row.ask) / 2;
         const total = mid * contracts * 100;
-        pricePreview.textContent = `Estimated cost: ${contracts} contract(s) × $${mid.toFixed(2)} premium × 100 = $${total.toFixed(2)}`;
+        pricePreview.textContent = `Estimated cost: ${contracts} contract(s) × $${mid.toFixed(2)} premium × 100 shares = $${total.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
         pricePreview.style.display = 'block';
     }
 })();
