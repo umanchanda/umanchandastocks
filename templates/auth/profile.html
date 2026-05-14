@@ -1,0 +1,18 @@
+{% extends "layout.html" %}
+
+{% block title %}My Profile{% endblock %}
+
+{% block main %}
+<div class="row justify-content-center">
+    <div class="col-md-5 col-lg-4">
+        <div class="form-card">
+            <h4 class="mb-4 fw-bold">My Profile</h4>
+            <dl class="mb-4">
+                <dt class="text-muted small text-uppercase">Username</dt>
+                <dd class="fs-5 fw-semibold">{{ user.username }}</dd>
+            </dl>
+            <a class="btn btn-outline-primary w-100" href="/change-password">Change Password</a>
+        </div>
+    </div>
+</div>
+{% endblock %}
