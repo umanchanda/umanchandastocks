@@ -25,7 +25,7 @@ A paper trading application for stocks and options, built with Flask and Postgre
 3. Set required environment variables:
    ```bash
    export SECRET_KEY="your-secret-key-here"
-   export DATABASE_URL="sqlite:///finance.db"   # or a PostgreSQL URL
+   export DATABASE_URL="postgresql://..."   # Neon or any PostgreSQL connection string
    ```
 
 4. Run the app:
