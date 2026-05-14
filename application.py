@@ -18,7 +18,9 @@ if not secret_key:
     raise RuntimeError("SECRET_KEY environment variable is not set")
 app.config["SECRET_KEY"] = secret_key
 
-_db_url = os.environ.get("DATABASE_URL", "sqlite:///finance.db")
+_db_url = os.environ.get("DATABASE_URL")
+if not _db_url:
+    raise RuntimeError("DATABASE_URL environment variable is not set")
 if "channel_binding" in _db_url:
     from urllib.parse import urlparse, urlencode, parse_qs, urlunparse
     _parsed = urlparse(_db_url)
