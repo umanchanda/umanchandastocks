@@ -1,6 +1,7 @@
 from flask import Blueprint, flash, redirect, render_template, request, session
 from werkzeug.security import check_password_hash, generate_password_hash
 
+from helpers import login_required
 from models import db, User
 
 auth_bp = Blueprint("auth", __name__)
@@ -79,3 +80,39 @@ def login():
 def logout():
     session.clear()
     return redirect("/")
+
+
+@auth_bp.route("/change-password", methods=["GET", "POST"])
+@login_required
+def change_password():
+    if request.method == "POST":
+        current = request.form.get("current_password", "")
+        new = request.form.get("password", "")
+        confirmation = request.form.get("confirmation", "")
+
+        if not current or not new or not confirmation:
+            flash("All fields are required", "error")
+            return redirect("/change-password")
+        if len(new) < 8:
+            flash("New password must be at least 8 characters", "error")
+            return redirect("/change-password")
+        if new != confirmation:
+            flash("New passwords do not match", "error")
+            return redirect("/change-password")
+
+        try:
+            user = db.session.get(User, session["user_id"])
+        except Exception:
+            flash("An error occurred. Please try again.", "error")
+            return redirect("/change-password")
+
+        if not check_password_hash(user.hash, current):
+            flash("Current password is incorrect", "error")
+            return redirect("/change-password")
+
+        user.hash = generate_password_hash(new)
+        db.session.commit()
+        flash("Password updated successfully", "success")
+        return redirect("/")
+
+    return render_template("auth/change_password.html")
