@@ -44,16 +44,28 @@ def register():
         if password != confirmation:
             flash("Passwords do not match", "error")
             return redirect("/register")
-        if User.query.filter_by(username=username).first():
+        try:
+            username_taken = User.query.filter_by(username=username).first()
+            email_taken = User.query.filter_by(email=email).first()
+        except Exception:
+            flash("An error occurred. Please try again.", "error")
+            return redirect("/register")
+
+        if username_taken:
             flash("Username already taken", "error")
             return redirect("/register")
-        if User.query.filter_by(email=email).first():
+        if email_taken:
             flash("An account with that email already exists", "error")
             return redirect("/register")
 
-        user = User(username=username, email=email, hash=generate_password_hash(password))
-        db.session.add(user)
-        db.session.commit()
+        try:
+            user = User(username=username, email=email, hash=generate_password_hash(password))
+            db.session.add(user)
+            db.session.commit()
+        except Exception:
+            db.session.rollback()
+            flash("An error occurred creating your account. Please try again.", "error")
+            return redirect("/register")
         session["user_id"] = user.id
         return redirect("/")
 
@@ -75,7 +87,12 @@ def login():
             flash("Must provide password", "error")
             return redirect("/login")
 
-        user = User.query.filter_by(username=username).first()
+        try:
+            user = User.query.filter_by(username=username).first()
+        except Exception:
+            flash("An error occurred. Please try again.", "error")
+            return redirect("/login")
+
         if not user or not check_password_hash(user.hash, password):
             flash("Invalid username or password", "error")
             return redirect("/login")
