@@ -82,6 +82,13 @@ def logout():
     return redirect("/")
 
 
+@auth_bp.route("/profile")
+@login_required
+def profile():
+    user = db.session.get(User, session["user_id"])
+    return render_template("auth/profile.html", user=user)
+
+
 @auth_bp.route("/change-password", methods=["GET", "POST"])
 @login_required
 def change_password():
