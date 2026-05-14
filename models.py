@@ -9,6 +9,7 @@ class User(db.Model):
 
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(80), unique=True, nullable=False)
+    email = db.Column(db.String(254), unique=True, nullable=True)
     hash = db.Column(db.String(256), nullable=False)
     cash = db.Column(db.Numeric(12, 2), nullable=False, default=10000.00)
 
