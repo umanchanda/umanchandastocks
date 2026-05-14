@@ -1,9 +1,19 @@
 {% extends "layout.html" %}
 
-{% block title %}
-    Quote
-{% endblock %}
+{% block title %}Quote — {{ stock.symbol }}{% endblock %}
 
 {% block main %}
-   A share of {{ stock.name }} costs {{ stock.price }}
+<div class="row justify-content-center">
+    <div class="col-md-5 col-lg-4">
+        <div class="form-card text-center">
+            <div class="display-6 fw-bold mb-1">{{ stock.symbol }}</div>
+            <div class="text-muted mb-4">{{ stock.name }}</div>
+            <div class="display-5 fw-bold text-success mb-4">{{ stock.price | usd }}</div>
+            <div class="d-grid gap-2">
+                <a class="btn btn-success" href="/buy">Buy {{ stock.symbol }}</a>
+                <a class="btn btn-outline-secondary" href="/quote">Look Up Another</a>
+            </div>
+        </div>
+    </div>
+</div>
 {% endblock %}

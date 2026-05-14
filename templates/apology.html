@@ -1,12 +1,15 @@
 {% extends "layout.html" %}
 
-{% block title %}
-    Apology
-{% endblock %}
+{% block title %}Error {{ top }}{% endblock %}
 
 {% block main %}
-    <div class="alert alert-danger text-center" role="alert">
-        <h4 class="alert-heading">Error {{ top }}</h4>
-        <p>{{ bottom }}</p>
+<div class="row justify-content-center">
+    <div class="col-md-6 col-lg-5">
+        <div class="form-card text-center">
+            <div class="display-1 text-danger mb-3">{{ top }}</div>
+            <h4 class="mb-3">{{ bottom }}</h4>
+            <a class="btn btn-outline-secondary" href="javascript:history.back()">Go Back</a>
+        </div>
     </div>
+</div>
 {% endblock %}

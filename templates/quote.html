@@ -1,14 +1,20 @@
 {% extends "layout.html" %}
 
-{% block title %}
-    Quote
-{% endblock %}
+{% block title %}Quote{% endblock %}
 
 {% block main %}
-    <form action="/quote" method="post">
-        <div class="form-group">
-            <input autocomplete="off" autofocus class="form-control" name="symbol" placeholder="Symbol" type="text"/>
+<div class="row justify-content-center">
+    <div class="col-md-6 col-lg-5">
+        <div class="form-card">
+            <h4 class="mb-4 fw-bold">Get a Quote</h4>
+            <form action="/quote" method="post">
+                <div class="mb-3">
+                    <label class="form-label" for="symbol">Ticker Symbol</label>
+                    <input autofocus class="form-control text-uppercase" id="symbol" name="symbol" placeholder="e.g. AAPL" type="text" autocomplete="off" required/>
+                </div>
+                <button class="btn btn-primary w-100" type="submit">Look Up</button>
+            </form>
         </div>
-        <button class="btn btn-primary" type="submit">Search</button>
-    </form>
+    </div>
+</div>
 {% endblock %}

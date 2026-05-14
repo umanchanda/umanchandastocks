@@ -1,48 +1,54 @@
 {% extends "layout.html" %}
 
-{% block title %}
-    Buy
-{% endblock %}
+{% block title %}Buy{% endblock %}
 
 {% block main %}
-    <form action="/buy" method="post">
-        <div class="form-group">
-            <input autocomplete="off" autofocus class="form-control" name="symbol" placeholder="Symbol" type="text"/>
-        </div>
-
-        <div class="btn-group mb-3 d-flex">
-            <label class="btn btn-outline-primary active w-50" id="label-shares">
-                <input type="radio" name="mode" value="shares" checked> Shares
-            </label>
-            <label class="btn btn-outline-primary w-50" id="label-dollars">
-                <input type="radio" name="mode" value="dollars"> Dollar Amount
-            </label>
-        </div>
-
-        <div id="shares-input" class="form-group">
-            <input autocomplete="off" class="form-control" name="shares" placeholder="Number of shares" type="number" min="0.0001" step="any"/>
-        </div>
-        <div id="dollars-input" class="form-group" style="display:none">
-            <div class="input-group">
-                <div class="input-group-prepend">
-                    <span class="input-group-text">$</span>
+<div class="row justify-content-center">
+    <div class="col-md-6 col-lg-5">
+        <div class="form-card">
+            <h4 class="mb-4 fw-bold">Buy Stock</h4>
+            <form action="/buy" method="post">
+                <div class="mb-3">
+                    <label class="form-label" for="symbol">Ticker Symbol</label>
+                    <input autofocus class="form-control text-uppercase" id="symbol" name="symbol" placeholder="e.g. AAPL" type="text" autocomplete="off" required/>
                 </div>
-                <input autocomplete="off" class="form-control" name="dollars" placeholder="Amount in USD" type="number" min="0.01" step="0.01"/>
-            </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Order Type</label>
+                    <div class="btn-group w-100" role="group">
+                        <input type="radio" class="btn-check" name="mode" id="mode-shares" value="shares" checked>
+                        <label class="btn btn-outline-primary" for="mode-shares">By Shares</label>
+                        <input type="radio" class="btn-check" name="mode" id="mode-dollars" value="dollars">
+                        <label class="btn btn-outline-primary" for="mode-dollars">By Dollar Amount</label>
+                    </div>
+                </div>
+
+                <div class="mb-3" id="shares-input">
+                    <label class="form-label" for="shares">Number of Shares</label>
+                    <input class="form-control" id="shares" name="shares" placeholder="e.g. 10 or 2.5" type="number" min="0.0001" step="any"/>
+                </div>
+
+                <div class="mb-3" id="dollars-input" style="display:none;">
+                    <label class="form-label" for="dollars">Dollar Amount</label>
+                    <div class="input-group">
+                        <span class="input-group-text">$</span>
+                        <input class="form-control" id="dollars" name="dollars" placeholder="e.g. 500.00" type="number" min="0.01" step="0.01"/>
+                    </div>
+                </div>
+
+                <button class="btn btn-success w-100 mt-2" type="submit">Buy</button>
+            </form>
         </div>
+    </div>
+</div>
 
-        <button class="btn btn-primary" type="submit">Buy</button>
-    </form>
-
-    <script>
-        document.querySelectorAll('input[name="mode"]').forEach(function(radio) {
-            radio.addEventListener('change', function() {
-                var isShares = this.value === 'shares';
-                document.getElementById('shares-input').style.display = isShares ? '' : 'none';
-                document.getElementById('dollars-input').style.display = isShares ? 'none' : '';
-                document.getElementById('label-shares').classList.toggle('active', isShares);
-                document.getElementById('label-dollars').classList.toggle('active', !isShares);
-            });
-        });
-    </script>
+<script>
+document.querySelectorAll('input[name="mode"]').forEach(function(radio) {
+    radio.addEventListener('change', function() {
+        var isShares = this.value === 'shares';
+        document.getElementById('shares-input').style.display = isShares ? '' : 'none';
+        document.getElementById('dollars-input').style.display = isShares ? 'none' : '';
+    });
+});
+</script>
 {% endblock %}
