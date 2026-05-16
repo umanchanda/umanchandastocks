@@ -1,0 +1,47 @@
+{% extends "layout.html" %}
+
+{% block title %}Options History{% endblock %}
+
+{% block main %}
+<h2 class="section-heading">Options Transaction History</h2>
+
+{% if transactions %}
+<div class="table-responsive">
+    <table class="table table-hover bg-white rounded shadow-sm">
+        <thead class="table-light">
+            <tr>
+                <th>Date / Time</th>
+                <th>Symbol</th>
+                <th>Type</th>
+                <th>Action</th>
+                <th class="text-end">Strike</th>
+                <th>Expiration</th>
+                <th class="text-end">Contracts</th>
+                <th class="text-end">Premium</th>
+                <th class="text-end">Total</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for tx in transactions %}
+            {% set is_buy = tx.contracts > 0 %}
+            <tr>
+                <td class="text-muted small">{{ tx.datetime.strftime('%Y-%m-%d %H:%M') if tx.datetime else '—' }}</td>
+                <td><strong>{{ tx.symbol }}</strong></td>
+                <td><span class="badge {{ 'bg-success' if tx.option_type == 'call' else 'bg-danger' }}">{{ tx.option_type | capitalize }}</span></td>
+                <td><span class="badge {{ 'bg-success' if is_buy else 'bg-secondary' }}">{{ 'Buy' if is_buy else 'Sell' }}</span></td>
+                <td class="text-end">{{ tx.strike | usd }}</td>
+                <td>{{ tx.expiration }}</td>
+                <td class="text-end {{ 'text-buy' if is_buy else 'text-sell' }}">
+                    {{ '+' if is_buy else '' }}{{ tx.contracts }}
+                </td>
+                <td class="text-end">{{ tx.premium | usd }}</td>
+                <td class="text-end">{{ (tx.contracts | abs * tx.premium | float * 100) | usd }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% else %}
+<p class="text-muted">No options transactions yet. <a href="/options/buy">Buy options</a>.</p>
+{% endif %}
+{% endblock %}
