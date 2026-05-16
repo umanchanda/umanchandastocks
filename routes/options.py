@@ -157,6 +157,15 @@ def sell():
     return render_template("options/sell.html", positions=positions)
 
 
+@options_bp.route("/history")
+@login_required
+def history():
+    transactions = OptionTransaction.query.filter_by(
+        user_id=session["user_id"]
+    ).order_by(OptionTransaction.datetime.desc()).all()
+    return render_template("options/history.html", transactions=transactions)
+
+
 @options_bp.route("/chain/<symbol>")
 @login_required
 def chain_expirations(symbol):
