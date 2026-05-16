@@ -122,11 +122,16 @@ def sell():
             return redirect("/options/sell")
 
         exp_str = position.expiration.strftime("%Y-%m-%d")
+        is_expired = position.expiration < date.today()
         premium = _get_option_price(position.symbol, exp_str,
                                     position.option_type, float(position.strike))
+
         if premium is None:
-            flash("Could not fetch current option price — try again", "error")
-            return redirect("/options/sell")
+            if is_expired:
+                premium = 0.0
+            else:
+                flash("Could not fetch current option price — try again", "error")
+                return redirect("/options/sell")
 
         proceeds = premium * contracts * 100
         user.cash = float(user.cash) + proceeds
@@ -143,7 +148,10 @@ def sell():
             position.contracts -= contracts
 
         db.session.commit()
-        flash(f"Sold {contracts} contract(s) for ${proceeds:,.2f}", "success")
+        if is_expired:
+            flash(f"Closed {contracts} expired contract(s) at $0.00", "success")
+        else:
+            flash(f"Sold {contracts} contract(s) for ${proceeds:,.2f}", "success")
         return redirect("/")
 
     return render_template("options/sell.html", positions=positions)
