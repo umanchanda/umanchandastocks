@@ -1,0 +1,14 @@
+[project]
+name = "umanchandastocks"
+version = "0.1.0"
+description = "A paper trading application for stocks and options, built with Flask and PostgreSQL."
+requires-python = ">=3.13"
+dependencies = [
+    "flask",
+    "flask-sqlalchemy",
+    "flask-session",
+    "psycopg2-binary",
+    "yfinance",
+    "gunicorn",
+    "python-dotenv",
+]

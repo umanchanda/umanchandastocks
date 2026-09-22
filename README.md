@@ -17,12 +17,12 @@ A paper trading application for stocks and options, built with Flask and Postgre
    cd umanchandastocks
    ```
 
-2. Install dependencies:
+2. Install dependencies with [uv](https://docs.astral.sh/uv/):
    ```bash
-   pip install -r requirements.txt
+   uv sync
    ```
 
-3. Set required environment variables:
+3. Set required environment variables (or add them to a `.env` file, which is loaded automatically):
    ```bash
    export SECRET_KEY="your-secret-key-here"
    export DATABASE_URL="postgresql://..."   # Neon or any PostgreSQL connection string
@@ -30,9 +30,9 @@ A paper trading application for stocks and options, built with Flask and Postgre
 
 4. Run the app:
    ```bash
-   gunicorn src.application:app
+   uv run gunicorn src.application:app
    # or, for local dev with auto-reload:
-   python -m flask --app src.application run --debug
+   uv run flask --app src.application run --debug
    ```
 
 5. Open `http://127.0.0.1:8000` in your browser.
