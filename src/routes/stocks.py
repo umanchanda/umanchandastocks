@@ -1,7 +1,7 @@
 from flask import Blueprint, flash, redirect, render_template, request, session
 
-from helpers import login_required, lookup
-from models import db, User, Portfolio, Transaction, OptionPosition
+from src.helpers import login_required, lookup
+from src.models import db, User, Portfolio, Transaction, OptionPosition
 
 stocks_bp = Blueprint("stocks", __name__)
 

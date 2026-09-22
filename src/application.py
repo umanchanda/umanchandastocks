@@ -5,13 +5,18 @@ from flask import Flask
 from flask_session import Session
 from werkzeug.exceptions import default_exceptions
 
-from helpers import apology, usd
-from models import db
-from routes.auth import auth_bp
-from routes.stocks import stocks_bp
-from routes.options import options_bp
+from src.helpers import apology, usd
+from src.models import db
+from src.routes.auth import auth_bp
+from src.routes.stocks import stocks_bp
+from src.routes.options import options_bp
 
-app = Flask(__name__)
+# Determine project root to locate templates/static
+BASE_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
+TEMPLATE_DIR = os.path.join(BASE_DIR, "templates")
+STATIC_DIR = os.path.join(BASE_DIR, "static")
+
+app = Flask(__name__, template_folder=TEMPLATE_DIR, static_folder=STATIC_DIR)
 
 secret_key = os.environ.get("SECRET_KEY")
 if not secret_key:

@@ -3,3 +3,4 @@ Flask-SQLAlchemy
 Flask-Session
 psycopg2-binary
 yfinance
+gunicorn
