@@ -1,9 +1,12 @@
 import os
 from tempfile import mkdtemp
 
+from dotenv import load_dotenv
 from flask import Flask
 from flask_session import Session
 from werkzeug.exceptions import default_exceptions
+
+load_dotenv()  # no-op if .env is absent (e.g. on Render)
 
 from src.helpers import apology, usd
 from src.models import db
